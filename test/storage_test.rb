@@ -9,33 +9,28 @@ class StorageTest < Test::Unit::TestCase
 
       @dummy = Dummy.new
       @avatar = @dummy.avatar
-
-      @current_env = RAILS_ENV
-      Object.send(:remove_const, 'RAILS_ENV')
-    end
-
-    teardown do
-      Object.send(:remove_const, 'RAILS_ENV') if defined?(RAILS_ENV)
-      Object.const_set("RAILS_ENV", @current_env)
     end
 
     should "get the correct credentials when RAILS_ENV is production" do
-      Object.const_set('RAILS_ENV', "production")
-      assert_equal({:key => "12345"},
-                   @avatar.parse_credentials('production' => {:key => '12345'},
-                                             :development => {:key => "54321"}))
+      temporary_rails_env('production') do
+        assert_equal({:key => "12345"},
+                     @avatar.parse_credentials('production' => {:key => '12345'},
+                                               :development => {:key => "54321"}))
+      end
     end
 
     should "get the correct credentials when RAILS_ENV is development" do
-      Object.const_set('RAILS_ENV', "development")
-      assert_equal({:key => "54321"},
-                   @avatar.parse_credentials('production' => {:key => '12345'},
-                                             :development => {:key => "54321"}))
+      temporary_rails_env('development') do
+        assert_equal({:key => "54321"},
+                     @avatar.parse_credentials('production' => {:key => '12345'},
+                                               :development => {:key => "54321"}))
+      end
     end
 
     should "return the argument if the key does not exist" do
-      Object.const_set('RAILS_ENV', "not really an env")
-      assert_equal({:test => "12345"}, @avatar.parse_credentials(:test => "12345"))
+      temporary_rails_env("not really an env") do
+        assert_equal({:test => "12345"}, @avatar.parse_credentials(:test => "12345"))
+      end
     end
   end
 
@@ -96,23 +91,18 @@ class StorageTest < Test::Unit::TestCase
                       :development  => { :bucket => "dev_bucket" }
                     }
       @dummy = Dummy.new
-      @old_env = RAILS_ENV
-      Object.send(:remove_const, 'RAILS_ENV')
-    end
-
-    teardown do
-      Object.send(:remove_const, 'RAILS_ENV') if defined?(RAILS_ENV)
-      Object.const_set("RAILS_ENV", @old_env)
     end
 
     should "get the right bucket in production" do
-      Object.const_set("RAILS_ENV", "production")
-      assert_equal "prod_bucket", @dummy.avatar.bucket_name
+      temporary_rails_env("production") do
+        assert_equal "prod_bucket", @dummy.avatar.bucket_name
+      end
     end
 
     should "get the right bucket in development" do
-      Object.const_set("RAILS_ENV", "development")
-      assert_equal "dev_bucket", @dummy.avatar.bucket_name
+      temporary_rails_env('development') do
+        assert_equal "dev_bucket", @dummy.avatar.bucket_name
+      end
     end
   end
 
