@@ -56,6 +56,20 @@ namespace :paperclip do
           instance.send("#{name}_file_name=", instance.send("#{name}_file_name").strip)
           instance.send("#{name}_content_type=", file.content_type.strip)
           instance.send("#{name}_file_size=", file.size) if instance.respond_to?("#{name}_file_size")
+
+          if instance.send(name).image? and
+            instance.respond_to?("#{name}_height") and
+            instance.respond_to?("#{name}_width")
+
+            begin
+              geometry = Paperclip::Geometry.from_file(instance.send(name).path(:original))
+              instance.send("#{name}_height=", geometry.height.to_i)
+              instance.send("#{name}_width=", geometry.width.to_i)
+            rescue NotIdentifiedByImageMagickError => e
+              puts "Couldn't get dimensions for #{name}: #{e}"
+            end
+          end
+
           instance.save(false)
         else
           true
