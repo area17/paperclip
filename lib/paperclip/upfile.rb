@@ -41,8 +41,3 @@ if defined? StringIO
     end
   end
 end
-
-class File #:nodoc:
-  include Paperclip::Upfile
-end
-
