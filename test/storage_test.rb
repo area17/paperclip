@@ -11,9 +11,11 @@ class StorageTest < Test::Unit::TestCase
       @avatar = @dummy.avatar
 
       @current_env = RAILS_ENV
+      Object.send(:remove_const, 'RAILS_ENV')
     end
 
     teardown do
+      Object.send(:remove_const, 'RAILS_ENV') if defined?(RAILS_ENV)
       Object.const_set("RAILS_ENV", @current_env)
     end
 
@@ -95,9 +97,13 @@ class StorageTest < Test::Unit::TestCase
                     }
       @dummy = Dummy.new
       @old_env = RAILS_ENV
+      Object.send(:remove_const, 'RAILS_ENV')
     end
 
-    teardown{ Object.const_set("RAILS_ENV", @old_env) }
+    teardown do
+      Object.send(:remove_const, 'RAILS_ENV') if defined?(RAILS_ENV)
+      Object.const_set("RAILS_ENV", @old_env)
+    end
 
     should "get the right bucket in production" do
       Object.const_set("RAILS_ENV", "production")
