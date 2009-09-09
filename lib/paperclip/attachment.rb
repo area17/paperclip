@@ -241,7 +241,7 @@ module Paperclip
       new_original = Tempfile.new("paperclip-reprocess")
       new_original.binmode
       if old_original = to_file(:original)
-        new_original.write(old_original.is_a?(RightAws::S3::Key) ? old_original.data : old_original.read)
+        new_original.write(old_original.is_a?(AWS::S3::S3Object) ? old_original.value : old_original.read)
         new_original.rewind
 
         @queued_for_write = { :original => new_original }
